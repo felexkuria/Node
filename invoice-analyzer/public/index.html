@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Analyzer</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-6 rounded shadow-md w-full max-w-4xl">
+        <h1 class="text-2xl mb-4">Upload Invoices</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="invoices" id="invoices" multiple class="mb-4">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Upload</button>
+        </form>
+        <div id="result" class="mt-4">
+            <table class="min-w-full bg-white">
+                <thead>
+                    <tr>
+                        <th class="py-2">Item Name</th>
+                        <th class="py-2">Price</th>
+                        <th class="py-2">Quantity</th>
+                        <th class="py-2">Item SKU</th>
+                        <th class="py-2">Seller</th>
+                        <th class="py-2">Customer Name</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceTableBody">
+                    <!-- Data will be appended here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            const files = document.getElementById('invoices').files;
+            for (let i = 0; i < files.length; i++) {
+                formData.append('invoices', files[i]);
+            }
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                const result = await response.json();
+                console.log('Result:', result);
+                const tableBody = document.getElementById('invoiceTableBody');
+                tableBody.innerHTML = '';
+                result.invoices.forEach(invoice => {
+                    const row = `<tr>
+                        <td class="border px-4 py-2">${invoice.itemName}</td>
+                        <td class="border px-4 py-2">${invoice.price}</td>
+                        <td class="border px-4 py-2">${invoice.quantity}</td>
+                        <td class="border px-4 py-2">${invoice.sku}</td>
+                        <td class="border px-4 py-2">${invoice.seller}</td>
+                        <td class="border px-4 py-2">${invoice.customerName}</td>
+                    </tr>`;
+                    tableBody.insertAdjacentHTML('beforeend', row);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

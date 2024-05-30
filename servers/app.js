@@ -29,12 +29,46 @@
 // });
 
 const express = require('express');
+const mongoose = require('mongoose');
+//const { MongoClient, ServerApiVersion } = require('mongodb');
+const  morgan =require("morgan")
+const blog =require("./model/blog");
+const Blog = require('./model/blog');
 
 // express app
 const app = express();
 
-// listen for requests
-app.listen(3000);
+
+//middle ware and static file
+app.use(express.static("public"))
+// connect to mongodb
+const uri = "mongodb+srv://engineerfelex:rw75LoJqazy8d6Rv@cluster0.vte1e4l.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+//rw75LoJqazy8d6Rv
+mongoose.connect(uri)
+  .then(() =>{console.log('Connected!');// listen for requests
+  app.listen(3000);} );
+
+
+
+ app.use(morgan("dev"))
+
+ app.get('/add-blog',(res,req)=>{
+  const blog =new Blog({
+  title:"new title",
+  snippet:"about new blog",
+  body:"Learn More"
+
+ });
+blog.save().
+then((result)=>{
+  // res.send(result)
+  console.log(result)
+})
+.catch((error)=>{console.log(error);
+
+});
+ })
 
 // register view engine
 app.set('view engine', 'ejs');
